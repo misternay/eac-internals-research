@@ -52,7 +52,9 @@ Knowledge distilled from public UnKnoWnCheaTs research threads (Dec 2025 – Mar
 3. **Hypervisor-based** — hide everything below VT-x; heavy engineering.
 4. **Kernel IRQL trick** — detection fns check `cr8 < DISPATCH_LEVEL` before running; raising IRQL skips those paths (careful: no pageable code/wait at DISPATCH).
 5. **External read-only** — survives where internal hooks get banned fast (game close-in-seconds class detection).
-6. Dead/dying: VAD spoofing, VAD unlinking, physical remap, registry HWID spoof, public CE/free bypasses (post-enforce), ntdll code patching.
+6. **Driver emulation (KEVLAR, Jul 2026 release)** — Unicorn-based x64 kernel emulator: map .sys at fake address, fake DRIVER_OBJECT/KPCR/EPROCESS, 345 kernel API names (host-implemented or stubbed), per-thread Unicorn engines, IRP+IOCTL dispatch, CPUID/RDTSC/MSR hooks, detailed behavior logging. Author claims full recreation of a virtualized spoofer driver from logs alone — validates the "emulation over devirtualization" consensus for VM-obfuscated drivers. Works for EAC/BE; VGK passes boot checks.
+7. **Usermode handle-abuse execution (crillmail, Jul 2026)** — CreateRemoteThread works on EAC-protected process by abusing the handle Windows gives the *creator*: inject DLL into the **EAC launcher process at startup**, then use inherited handle + NtCreateThread + in-process gadgets to manual-map. Author: "so stupid and yet works... i doubt this will last long". Contradicts the assumption that PPL fully blocks UM thread creation — the parent-handle path was missed.
+8. Dead/dying: VAD spoofing, VAD unlinking, physical remap, registry HWID spoof, public CE/free bypasses (post-enforce), ntdll code patching.
 
 ## 5. RE workflow for anti-cheat-protected targets (lab use)
 
@@ -70,11 +72,13 @@ Knowledge distilled from public UnKnoWnCheaTs research threads (Dec 2025 – Mar
 - Highest-signal forums: *Anti-Cheat Bypass*, *General Programming and Reversing*. Quality marker: long "[Information] static/runtime analysis" posts by high-rep users (Helzky, moneyissogood, beck123x, JustAReverser) — treat vendor claims ("perma spoof") skeptically; community actively debunks.
 - Related refs: igromanru/SM2-EAC-Bypass-Doc (offline/private matches, still maintained Jun 2026), loldrivers.io (blacklisted vuln driver DB), fearlessrevolution.com (CE tables, ban reports).
 
-## Sources (read 2026-08-17)
+## Sources (read 2026-08-17, updated loop wakeup 2026-08-17)
 - EAC_EOS.sys Static Analysis — Helzky (UC 731114)
 - EAC_EOS Runtime Analysis — Helzky (UC 732015)
 - Analysing EAC's Cryptographic Protocol — moneyissogood (UC 738562)
 - Injecting DLL into EAC-protected process — Un1xCr3w test matrix (UC 739720)
 - AC Detection in 2026: Fact vs Myth — OXYGENmase/JustAReverser (UC 744088)
 - any modern ways to bypass EAC? (UC 723876)
+- KEVLAR x64 kernel driver emulator source (EAC/BE/VGK) — lolz5465az (UC 765226, Jul 2026)
+- execute code in EAC protected process from usermode — crillmail (UC 765070, Jul 2026)
 - Raw thread dumps saved in workspace `cache/browser-use/workspace/*/eac_*.txt`
